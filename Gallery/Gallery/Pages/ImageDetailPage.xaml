@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:Gallery.PageModels"             
+             xmlns:models="clr-namespace:Gallery.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Gallery.Pages.ImageDetailPage"
+             x:DataType="pageModels:ImageDetailPageModel"
+             Title="Image Details">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Edit" Command="{Binding EditCommand}" IconImageSource="edit.png" />
+        <ToolbarItem Text="Delete" Command="{Binding DeleteCommand}" IconImageSource="delete.png" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <StackLayout Padding="15" Spacing="20">
+            <!-- Image Display -->
+            <Border StrokeThickness="2"
+                    Stroke="LightGray"
+                    StrokeShape="RoundRectangle 15"
+                    BackgroundColor="White">
+                <Image Source="{Binding Image.FilePath}"
+                       Aspect="AspectFit"
+                       HeightRequest="300"
+                       WidthRequest="{Binding Source={x:Reference ImageDetailPage}, Path=Width}"
+                       HorizontalOptions="Fill" />
+            </Border>
+
+            <!-- Image Information -->
+            <StackLayout Spacing="10">
+                <Label Text="Image Information" FontSize="18" FontAttributes="Bold" />
+                
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="100,*" RowSpacing="5">
+                    <Label Grid.Row="0" Grid.Column="0" Text="Title:" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Entry Grid.Row="0" Grid.Column="1" 
+                           Text="{Binding ImageTitle}" 
+                           IsReadOnly="{Binding IsEditMode, Converter={toolkit:InvertedBoolConverter}}"
+                           BackgroundColor="{Binding IsEditMode, Converter={toolkit:BoolToObjectConverter TrueObject=LightYellow, FalseObject=Transparent}}" />
+
+                    <Label Grid.Row="1" Grid.Column="0" Text="Description:" FontAttributes="Bold" VerticalOptions="Start" />
+                    <Editor Grid.Row="1" Grid.Column="1" 
+                            Text="{Binding ImageDescription}" 
+                            IsReadOnly="{Binding IsEditMode, Converter={toolkit:InvertedBoolConverter}}"
+                            HeightRequest="80"
+                            BackgroundColor="{Binding IsEditMode, Converter={toolkit:BoolToObjectConverter TrueObject=LightYellow, FalseObject=Transparent}}" />
+
+                    <Label Grid.Row="2" Grid.Column="0" Text="File:" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding Image.FileName}" VerticalOptions="Center" />
+
+                    <Label Grid.Row="3" Grid.Column="0" Text="Size:" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Label Grid.Row="3" Grid.Column="1" Text="{Binding FileSizeFormatted}" VerticalOptions="Center" />
+                </Grid>
+
+                <!-- Edit Mode Controls -->
+                <StackLayout Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsEditMode}">
+                    <Button Text="Save" Command="{Binding SaveChangesCommand}" BackgroundColor="Green" TextColor="White" />
+                    <Button Text="Cancel" Command="{Binding CancelEditCommand}" BackgroundColor="Gray" TextColor="White" />
+                </StackLayout>
+            </StackLayout>
+
+            <!-- Tags Section -->
+            <StackLayout Spacing="15">
+                <Label Text="Tags" FontSize="18" FontAttributes="Bold" />
+
+                <!-- Current Tags -->
+                <StackLayout>
+                    <Label Text="Current Tags:" FontAttributes="Bold" />
+                    <FlexLayout BindableLayout.ItemsSource="{Binding ImageTags}"
+                                Wrap="Wrap"
+                                JustifyContent="Start"
+                                AlignItems="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Tag">
+                                <Border BackgroundColor="LightBlue"
+                                        StrokeThickness="1"
+                                        Stroke="Blue"
+                                        StrokeShape="RoundRectangle 15"
+                                        Margin="3">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference ImageDetailPage}, Path=BindingContext.RemoveTagCommand}"
+                                                             CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <StackLayout Orientation="Horizontal" Padding="10,5">
+                                        <Label Text="{Binding Name}" VerticalOptions="Center" TextColor="DarkBlue" />
+                                        <Label Text="×" FontSize="16" VerticalOptions="Center" TextColor="DarkBlue" />
+                                    </StackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <Label Text="No tags added yet" 
+                           IsVisible="{Binding ImageTags, Converter={toolkit:ListIsNullOrEmptyConverter}}"
+                           TextColor="Gray"
+                           Margin="10" />
+                </StackLayout>
+
+                <!-- Add New Tag -->
+                <StackLayout>
+                    <Label Text="Add Tags:" FontAttributes="Bold" />
+                    
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <Entry x:Name="NewTagEntry"
+                               Text="{Binding NewTagName}"
+                               Placeholder="Enter tag name..."
+                               HorizontalOptions="FillAndExpand" />
+                        <Button Text="Add" Command="{Binding AddTagCommand}" />
+                    </StackLayout>
+
+                    <!-- Quick Tag Suggestions -->
+                    <Label Text="Suggested Tags:" FontAttributes="Bold" Margin="0,10,0,5" />
+                    <FlexLayout BindableLayout.ItemsSource="{Binding SuggestedTags}"
+                                Wrap="Wrap"
+                                JustifyContent="Start"
+                                AlignItems="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Tag">
+                                <Border BackgroundColor="LightGray"
+                                        StrokeThickness="1"
+                                        Stroke="Gray"
+                                        StrokeShape="RoundRectangle 15"
+                                        Margin="3">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference ImageDetailPage}, Path=BindingContext.AddSuggestedTagCommand}"
+                                                             CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Name}" 
+                                           Padding="10,5" 
+                                           VerticalOptions="Center" 
+                                           TextColor="DarkGray" />
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </StackLayout>
+            </StackLayout>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

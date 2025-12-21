@@ -11,19 +11,143 @@
              Title="Gallery">
 
     <ContentPage.Behaviors>
-
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadImagesCommand}" />
     </ContentPage.Behaviors>
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:IsNotNullConverter x:Key="ListIsNotNullOrEmptyConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid>
-        <Label Text="Welcome to the Gallery!"
-           VerticalOptions="Center"
-           HorizontalOptions="Center"
-           FontSize="24"/>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add" Command="{Binding AddImageCommand}" IconImageSource="plus.png" />
+        <ToolbarItem Text="Add Multiple" Command="{Binding AddMultipleImagesCommand}" IconImageSource="plus_multiple.png" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Search Bar -->
+        <SearchBar x:Name="SearchBar" 
+                   Grid.Row="0"
+                   Placeholder="Search by tags..."
+                   Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}"
+                   Margin="10,5"/>
+
+        <!-- Tag Filter Chips -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" Margin="10,0">
+            <StackLayout Orientation="Horizontal" BindableLayout.ItemsSource="{Binding FilterTags}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Tag">
+                        <Border BackgroundColor="LightBlue" 
+                                StrokeThickness="1" 
+                                Stroke="Blue"
+                                StrokeShape="RoundRectangle 15"
+                                Margin="3,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference OverviewPage}, Path=BindingContext.RemoveFilterTagCommand}"
+                                                     CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <StackLayout Orientation="Horizontal" Padding="10,5">
+                                <Label Text="{Binding Name}" VerticalOptions="Center" TextColor="DarkBlue" />
+                                <Label Text="×" FontSize="16" VerticalOptions="Center" TextColor="DarkBlue" />
+                            </StackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Images Grid -->
+        <pullToRefresh:SfPullToRefresh Grid.Row="2" 
+                                       IsRefreshing="{Binding IsLoading}"
+                                       RefreshCommand="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Images}" 
+                            BackgroundColor="Transparent"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedImage}"
+                            SelectionChangedCommand="{Binding ImageSelectedCommand}">
+                
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" 
+                                     Span="3" 
+                                     VerticalItemSpacing="5" 
+                                     HorizontalItemSpacing="5" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Image">
+                        <Border StrokeThickness="2"
+                                Stroke="LightGray"
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="White"
+                                Margin="5">
+                            
+                            <Grid RowDefinitions="*,Auto">
+                                <!-- Image -->
+                                <Border Grid.Row="0" 
+                                        StrokeShape="RoundRectangle 8"
+                                        HeightRequest="120"
+                                        WidthRequest="120"
+                                        ClipToBounds="True">
+                                    <Image Source="{Binding FilePath}"
+                                           Aspect="AspectFill" />
+                                </Border>
+
+                                <!-- Image Info -->
+                                <StackLayout Grid.Row="1" Padding="5">
+                                    <Label Text="{Binding Title}" 
+                                           FontSize="12" 
+                                           FontAttributes="Bold"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+                                    
+                                    <!-- Tags -->
+                                    <StackLayout Orientation="Horizontal" 
+                                                 BindableLayout.ItemsSource="{Binding ImageTags}"
+                                                 IsVisible="{Binding ImageTags, Converter={StaticResource ListIsNotNullOrEmptyConverter}}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="models:ImageTag">
+                                                <Border BackgroundColor="LightGray"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        Padding="4,2"
+                                                        Margin="1">
+                                                    <Label Text="{Binding Tag.Name}" 
+                                                           FontSize="10" 
+                                                           TextColor="DarkGray" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </StackLayout>
+                                </StackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                        <Label Text="No images in your gallery" 
+                               FontSize="18" 
+                               HorizontalOptions="Center" 
+                               TextColor="Gray" />
+                        <Label Text="Tap the + button to add photos" 
+                               FontSize="14" 
+                               HorizontalOptions="Center" 
+                               TextColor="LightGray" 
+                               Margin="0,10,0,0" />
+                    </StackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </pullToRefresh:SfPullToRefresh>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="2"
+                           IsVisible="{Binding IsLoading}"
+                           IsRunning="{Binding IsLoading}"
+                           Color="Blue"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
     </Grid>
 </ContentPage>

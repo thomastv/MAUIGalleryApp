@@ -1,16 +1,22 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using Gallery.Pages;
 using Font = Microsoft.Maui.Font;
+
 namespace Gallery;
 
 public partial class AppShell : Shell
 {
-	public AppShell()
-	{
-		InitializeComponent();
-		var currentTheme = Application.Current!.RequestedTheme;		
-		ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
-	}
+    public AppShell()
+    {
+        InitializeComponent();
+        
+        // Register routes for navigation
+        Routing.RegisterRoute("ImageDetail", typeof(ImageDetailPage));
+        
+        var currentTheme = Application.Current!.RequestedTheme;
+        ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
+    }
 	public static async Task DisplaySnackbarAsync(string message)
 	{
 		CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
