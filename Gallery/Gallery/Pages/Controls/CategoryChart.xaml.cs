@@ -1,9 +1,0 @@
-namespace Gallery.Pages.Controls;
-
-public partial class CategoryChart
-{
-	public CategoryChart()
-	{
-		InitializeComponent();
-	}
-}
