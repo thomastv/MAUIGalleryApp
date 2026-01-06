@@ -5,12 +5,8 @@ using ImageTagModel = Gallery.Models.ImageTag;
 
 namespace Gallery.Data;
 
-public class GalleryContext : DbContext
+public class GalleryContext(DbContextOptions<GalleryContext> options) : DbContext(options)
 {
-    public GalleryContext(DbContextOptions<GalleryContext> options) : base(options)
-    {
-    }
-
     public DbSet<ImageModel> Images { get; set; }
     public DbSet<TagModel> Tags { get; set; }
     public DbSet<ImageTagModel> ImageTags { get; set; }
