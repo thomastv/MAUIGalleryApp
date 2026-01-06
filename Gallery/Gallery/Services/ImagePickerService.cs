@@ -3,15 +3,8 @@ using Gallery.Services;
 
 namespace Gallery.Services;
 
-public class ImagePickerService
+public class ImagePickerService(ImageService imageService)
 {
-    private readonly ImageService _imageService;
-
-    public ImagePickerService(ImageService imageService)
-    {
-        _imageService = imageService;
-    }
-
     public async Task<bool> PickAndAddImageAsync()
     {
         try
@@ -32,7 +25,7 @@ public class ImagePickerService
                 return false;
 
             // Add to database
-            await _imageService.AddImageAsync(localFilePath, result.FileName);
+            await imageService.AddImageAsync(localFilePath, result.FileName);
             return true;
         }
         catch (Exception)
@@ -62,7 +55,7 @@ public class ImagePickerService
                     var localFilePath = await CopyFileToLocalStorageAsync(result);
                     if (localFilePath != null)
                     {
-                        await _imageService.AddImageAsync(localFilePath, result.FileName);
+                        await imageService.AddImageAsync(localFilePath, result.FileName);
                         successCount++;
                     }
                 }

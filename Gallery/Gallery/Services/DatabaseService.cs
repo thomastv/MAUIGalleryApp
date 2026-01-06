@@ -4,14 +4,9 @@ using TagModel = Gallery.Models.Tag;
 
 namespace Gallery.Services;
 
-public class DatabaseService
+public class DatabaseService(GalleryContext context)
 {
-    private readonly GalleryContext _context;
-
-    public DatabaseService(GalleryContext context)
-    {
-        _context = context;
-    }
+    private readonly GalleryContext _context = context;
 
     public async Task InitializeDatabaseAsync()
     {

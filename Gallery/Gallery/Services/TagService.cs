@@ -4,30 +4,23 @@ using TagModel = Gallery.Models.Tag;
 
 namespace Gallery.Services;
 
-public class TagService
+public class TagService(GalleryContext context)
 {
-    private readonly GalleryContext _context;
-
-    public TagService(GalleryContext context)
-    {
-        _context = context;
-    }
-
     public async Task<IEnumerable<TagModel>> GetAllTagsAsync()
     {
-        return await _context.Tags
+        return await context.Tags
             .OrderBy(t => t.Name)
             .ToListAsync();
     }
 
     public async Task<TagModel?> GetTagByIdAsync(int id)
     {
-        return await _context.Tags.FindAsync(id);
+        return await context.Tags.FindAsync(id);
     }
 
     public async Task<TagModel?> GetTagByNameAsync(string name)
     {
-        return await _context.Tags
+        return await context.Tags
             .FirstOrDefaultAsync(t => t.Name == name);
     }
 
@@ -36,7 +29,7 @@ public class TagService
         if (string.IsNullOrWhiteSpace(searchTerm))
             return await GetAllTagsAsync();
 
-        return await _context.Tags
+        return await context.Tags
             .Where(t => t.Name.Contains(searchTerm) || t.Description.Contains(searchTerm))
             .OrderBy(t => t.Name)
             .ToListAsync();
@@ -55,15 +48,15 @@ public class TagService
             Description = description ?? string.Empty
         };
 
-        _context.Tags.Add(tag);
-        await _context.SaveChangesAsync();
+        context.Tags.Add(tag);
+        await context.SaveChangesAsync();
         
         return tag;
     }
 
     public async Task<bool> UpdateTagAsync(int tagId, string? name = null, string? description = null)
     {
-        var tag = await _context.Tags.FindAsync(tagId);
+        var tag = await context.Tags.FindAsync(tagId);
         if (tag == null)
             return false;
 
@@ -80,13 +73,13 @@ public class TagService
         if (description != null)
             tag.Description = description;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> DeleteTagAsync(int tagId)
     {
-        var tag = await _context.Tags
+        var tag = await context.Tags
             .Include(t => t.ImageTags)
             .FirstOrDefaultAsync(t => t.Id == tagId);
         
@@ -94,16 +87,16 @@ public class TagService
             return false;
 
         // Remove all image-tag relationships
-        _context.ImageTags.RemoveRange(tag.ImageTags);
-        _context.Tags.Remove(tag);
+        context.ImageTags.RemoveRange(tag.ImageTags);
+        context.Tags.Remove(tag);
         
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return true;
     }
 
     public async Task<IEnumerable<TagModel>> GetTagsForImageAsync(int imageId)
     {
-        return await _context.ImageTags
+        return await context.ImageTags
             .Where(it => it.ImageId == imageId)
             .Select(it => it.Tag)
             .OrderBy(t => t.Name)
@@ -112,7 +105,7 @@ public class TagService
 
     public async Task<int> GetImageCountForTagAsync(int tagId)
     {
-        return await _context.ImageTags
+        return await context.ImageTags
             .CountAsync(it => it.TagId == tagId);
     }
 }

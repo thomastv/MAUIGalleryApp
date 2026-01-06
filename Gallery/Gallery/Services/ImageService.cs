@@ -6,18 +6,11 @@ using ImageTagModel = Gallery.Models.ImageTag;
 
 namespace Gallery.Services;
 
-public class ImageService
+public class ImageService(GalleryContext context)
 {
-    private readonly GalleryContext _context;
-
-    public ImageService(GalleryContext context)
-    {
-        _context = context;
-    }
-
     public async Task<IEnumerable<ImageModel>> GetAllImagesAsync()
     {
-        return await _context.Images
+        return await context.Images
             .Include(i => i.ImageTags)
             .ThenInclude(it => it.Tag)
             .OrderByDescending(i => i.CreatedAt)
@@ -26,7 +19,7 @@ public class ImageService
 
     public async Task<ImageModel?> GetImageByIdAsync(int id)
     {
-        return await _context.Images
+        return await context.Images
             .Include(i => i.ImageTags)
             .ThenInclude(it => it.Tag)
             .FirstOrDefaultAsync(i => i.Id == id);
@@ -41,7 +34,7 @@ public class ImageService
 
         var tagNamesList = tagNames.ToList();
         
-        return await _context.Images
+        return await context.Images
             .Include(i => i.ImageTags)
             .ThenInclude(it => it.Tag)
             .Where(i => i.ImageTags.Any(it => tagNamesList.Contains(it.Tag.Name)))
@@ -59,7 +52,7 @@ public class ImageService
 
         var lowerSearchTerm = searchTerm.ToLowerInvariant();
         
-        return await _context.Images
+        return await context.Images
             .Include(i => i.ImageTags)
             .ThenInclude(it => it.Tag)
             .Where(i => i.Title.ToLower().Contains(lowerSearchTerm) ||
@@ -85,8 +78,8 @@ public class ImageService
             TakenAt = fileInfo.Exists ? fileInfo.CreationTime : DateTime.Now
         };
 
-        _context.Images.Add(image);
-        await _context.SaveChangesAsync();
+        context.Images.Add(image);
+        await context.SaveChangesAsync();
         
         return image;
     }
@@ -94,7 +87,7 @@ public class ImageService
     public async Task<bool> AddTagToImageAsync(int imageId, int tagId)
     {
         // Check if the relationship already exists
-        var existingImageTag = await _context.ImageTags
+        var existingImageTag = await context.ImageTags
             .FirstOrDefaultAsync(it => it.ImageId == imageId && it.TagId == tagId);
 
         if (existingImageTag != null)
@@ -106,29 +99,29 @@ public class ImageService
             TagId = tagId
         };
 
-        _context.ImageTags.Add(imageTag);
-        await _context.SaveChangesAsync();
+        context.ImageTags.Add(imageTag);
+        await context.SaveChangesAsync();
         
         return true;
     }
 
     public async Task<bool> RemoveTagFromImageAsync(int imageId, int tagId)
     {
-        var imageTag = await _context.ImageTags
+        var imageTag = await context.ImageTags
             .FirstOrDefaultAsync(it => it.ImageId == imageId && it.TagId == tagId);
 
         if (imageTag == null)
             return false;
 
-        _context.ImageTags.Remove(imageTag);
-        await _context.SaveChangesAsync();
+        context.ImageTags.Remove(imageTag);
+        await context.SaveChangesAsync();
         
         return true;
     }
 
     public async Task<bool> DeleteImageAsync(int imageId)
     {
-        var image = await _context.Images.FindAsync(imageId);
+        var image = await context.Images.FindAsync(imageId);
         if (image == null)
             return false;
 
@@ -145,15 +138,15 @@ public class ImageService
             }
         }
 
-        _context.Images.Remove(image);
-        await _context.SaveChangesAsync();
+        context.Images.Remove(image);
+        await context.SaveChangesAsync();
         
         return true;
     }
 
     public async Task<bool> UpdateImageAsync(int imageId, string? title = null, string? description = null)
     {
-        var image = await _context.Images.FindAsync(imageId);
+        var image = await context.Images.FindAsync(imageId);
         if (image == null)
             return false;
 
@@ -163,7 +156,7 @@ public class ImageService
         if (description != null)
             image.Description = description;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return true;
     }
 }
