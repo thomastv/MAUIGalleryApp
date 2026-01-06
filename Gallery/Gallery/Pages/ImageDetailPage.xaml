@@ -87,7 +87,7 @@
                                     </Border.GestureRecognizers>
                                     <StackLayout Orientation="Horizontal" Padding="10,5">
                                         <Label Text="{Binding Name}" VerticalOptions="Center" TextColor="DarkBlue" />
-                                        <Label Text="×" FontSize="16" VerticalOptions="Center" TextColor="DarkBlue" />
+                                        <Label Text="ï¿½" FontSize="16" VerticalOptions="Center" TextColor="DarkBlue" />
                                     </StackLayout>
                                 </Border>
                             </DataTemplate>

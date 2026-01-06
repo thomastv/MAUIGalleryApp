@@ -7,25 +7,18 @@ using TagModel = Gallery.Models.Tag;
 
 namespace Gallery.PageModels;
 
-public partial class ImageDetailPageModel : ObservableObject
+public partial class ImageDetailPageModel(ImageService imageService, TagService tagService) : ObservableObject
 {
-    private readonly ImageService _imageService;
-    private readonly TagService _tagService;
-
-    public ImageDetailPageModel(ImageService imageService, TagService tagService)
-    {
-        _imageService = imageService;
-        _tagService = tagService;
-    }
-
+    private readonly ImageService _imageService = imageService;
+    private readonly TagService _tagService = tagService;
     [ObservableProperty]
     private ImageModel? image;
 
     [ObservableProperty]
-    private ObservableCollection<TagModel> imageTags = new();
+    private ObservableCollection<TagModel> imageTags = [];
 
     [ObservableProperty]
-    private ObservableCollection<TagModel> suggestedTags = new();
+    private ObservableCollection<TagModel> suggestedTags = [];
 
     [ObservableProperty]
     private string newTagName = string.Empty;
