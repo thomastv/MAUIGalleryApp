@@ -12,10 +12,6 @@ A feature-rich photo gallery application built with .NET MAUI that allows users 
 - 🎨 **Modern UI**: Clean interface with material design elements
 - 🌓 **Dark/Light Theme**: Support for both light and dark themes
 
-## Screenshots
-
-*[Screenshots would be added here when the app is running]*
-
 ## Architecture & Design
 
 ### Technology Stack
